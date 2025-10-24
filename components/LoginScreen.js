@@ -19,11 +19,10 @@ const LoginScreen = ({ onLogin }) => {
   const [usuarioAutorizado, setUsuarioAutorizado] = useState(null);
 
   useEffect(() => {
-    // Cargamos el usuario autorizado si existe
     (async () => {
-      const logins = await getPendingData(); // obtenemos todos los logins guardados
+      const logins = await getPendingData();
       if (logins.length > 0) {
-        setUsuarioAutorizado(logins[0].data.usuario); // usamos el primer usuario guardado
+        setUsuarioAutorizado(logins[0].data.usuario);
       }
     })();
   }, []);
@@ -34,24 +33,16 @@ const LoginScreen = ({ onLogin }) => {
       return;
     }
 
-    // Solo permitimos el usuario autorizado
     if (usuarioAutorizado && username !== usuarioAutorizado) {
       Alert.alert('Error', 'Usuario no autorizado');
       return;
     }
 
-    // Guardamos el login offline si es válido
-    const intento = {
-      usuario: username,
-      fecha: new Date().toISOString(),
-      exito: true,
-    };
-
+    const intento = { usuario: username, fecha: new Date().toISOString(), exito: true };
     const guardado = await saveLocalData('login', intento);
 
     if (guardado) {
       if (!usuarioAutorizado) {
-        // Si es el primer login, establecemos este usuario como autorizado
         setUsuarioAutorizado(username);
         Alert.alert('Éxito', `Usuario ${username} registrado y autorizado (offline)`);
       } else {
@@ -71,12 +62,13 @@ const LoginScreen = ({ onLogin }) => {
       style={styles.container}
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
     >
-      <View style={commonStyles.header}>
-        <Text style={commonStyles.appTitle}>Inicio de Sesión</Text>
-        <Text style={commonStyles.appSubtitle}>Inicia sesión para continuar</Text>
+      <View style={styles.header}>
+        <Text style={styles.title}>AgroApp Trazabilidad</Text>
+        <Text style={styles.subtitle}>Inicia sesión para continuar</Text>
       </View>
 
-      <View style={styles.formContainer}>
+      {/* Tarjeta central */}
+      <View style={styles.card}>
         <TextInput
           style={styles.input}
           placeholder="Usuario"
@@ -95,7 +87,7 @@ const LoginScreen = ({ onLogin }) => {
           onChangeText={setPassword}
         />
         
-        <TouchableOpacity style={styles.loginButton} onPress={handleLogin}>
+        <TouchableOpacity style={styles.loginButton} onPress={handleLogin} activeOpacity={0.9}>
           <Text style={styles.loginButtonText}>Iniciar Sesión</Text>
         </TouchableOpacity>
       </View>
@@ -104,29 +96,59 @@ const LoginScreen = ({ onLogin }) => {
 };
 
 const styles = StyleSheet.create({
-  container: { flex: 1, backgroundColor: colors.background },
-  formContainer: { flex: 1, padding: 30, justifyContent: 'center' },
-  input: {
-    backgroundColor: colors.white,
-    color: colors.textPrimary,
-    padding: 16,
-    borderRadius: 8,
-    marginBottom: 16,
+  container: {
+    flex: 1,
+    backgroundColor: '#F8F8F8', // Fondo base
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingHorizontal: 20,
+  },
+  header: {
+    alignItems: 'center',
+    marginBottom: 20,
+  },
+  title: {
+    color: '#4CAF50', // Verde primario
+    fontSize: 26,
+    fontWeight: '700',
+    marginBottom: 4,
+  },
+  subtitle: {
+    color: '#424242', // Gris oscuro
     fontSize: 16,
-    borderWidth: 2,
-    borderColor: colors.greenMedium,
+  },
+  card: {
+    width: '100%',
+    maxWidth: 380,
+    backgroundColor: '#FFFFFF',
+    borderRadius: 12,
+    paddingVertical: 30,
+    paddingHorizontal: 25,
+    shadowColor: '#000',
+    shadowOpacity: 0.15,
+    shadowRadius: 8,
+    shadowOffset: { width: 0, height: 4 },
+    elevation: 5,
+  },
+  input: {
+    backgroundColor: '#FFFFFF',
+    color: '#5D4037', // Texto principal
+    padding: 14,
+    borderRadius: 10,
+    marginBottom: 18,
+    fontSize: 16,
+    borderWidth: 1.5,
+    borderColor: '#BDBDBD',
   },
   loginButton: {
-    backgroundColor: colors.primary,
-    padding: 16,
-    borderRadius: 8,
+    backgroundColor: '#4CAF50',
+    padding: 14,
+    borderRadius: 10,
     alignItems: 'center',
-    marginTop: 8,
-    borderWidth: 2,
-    borderColor: colors.greenMedium,
+    elevation: 3,
   },
   loginButtonText: {
-    color: colors.white,
+    color: '#FFFFFF',
     fontSize: 16,
     fontWeight: '600',
   },

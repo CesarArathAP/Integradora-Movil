@@ -5,8 +5,8 @@ import LoginScreen from './components/LoginScreen';
 import HomeScreen from './components/HomeScreen';
 import ProduccionScreen from './components/ProduccionScreen';
 import CameraModule from './components/CameraModule';
-import InsumosScreen from './components/InsumosScreen'; // ✅ nueva pantalla
-import MainApp from './components/MainApp'; // opcional si lo usas como menú adicional
+import InsumosScreen from './components/InsumosScreen';
+import MainApp from './components/MainApp';
 
 const Stack = createNativeStackNavigator();
 
