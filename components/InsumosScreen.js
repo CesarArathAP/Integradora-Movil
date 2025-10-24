@@ -1,13 +1,17 @@
 import React, { useState } from 'react';
-import { View, Text, TextInput, TouchableOpacity, ScrollView, StyleSheet, Dimensions } from 'react-native';
+import { 
+  View, Text, TextInput, TouchableOpacity, ScrollView, 
+  StyleSheet, Dimensions, Platform 
+} from 'react-native';
 import { Picker } from '@react-native-picker/picker';
-import { commonStyles } from '../styles/common'; // Manteniendo por si se usan en otros lugares
-import { colors } from '../styles/colors'; // Manteniendo por si se usan en otros lugares
-import ViewInsumos from './etapas/ViewInsumos'; 
+import DateTimePicker from '@react-native-community/datetimepicker';
+import { commonStyles } from '../styles/common';
+import { colors } from '../styles/colors';
+import ViewInsumos from './etapas/ViewInsumos';
 
 const { width } = Dimensions.get('window');
 
-// Componente del Formulario de Registro (Tu código original)
+// --- Formulario de Registro ---
 const RegistroInsumos = ({ stylesRegistro }) => {
   const [invernadero, setInvernadero] = useState('');
   const [etapa, setEtapa] = useState('');
@@ -17,6 +21,7 @@ const RegistroInsumos = ({ stylesRegistro }) => {
   const [unidad, setUnidad] = useState('');
   const [fecha, setFecha] = useState('');
   const [proveedor, setProveedor] = useState('');
+  const [showPicker, setShowPicker] = useState(false);
 
   const handleRegistro = () => {
     console.log({
@@ -32,10 +37,20 @@ const RegistroInsumos = ({ stylesRegistro }) => {
     alert('Insumo Registrado (simulado)');
   };
 
+  const onChangeFecha = (event, selectedDate) => {
+    setShowPicker(false);
+    if (selectedDate) {
+      const dia = selectedDate.getDate().toString().padStart(2, '0');
+      const mes = (selectedDate.getMonth() + 1).toString().padStart(2, '0');
+      const año = selectedDate.getFullYear();
+      setFecha(`${dia}-${mes}-${año}`);
+    }
+  };
+
   return (
     <ScrollView
-      contentContainerStyle={styles.scrollContent} // Usamos el estilo de contenido del componente de referencia
-      style={styles.etapaContainer} // El formulario estará dentro del contenedor con sombra
+      contentContainerStyle={styles.scrollContent}
+      style={styles.etapaContainer}
     >
       <Text style={stylesRegistro.titleScreen}>+ Registrar insumo</Text>
 
@@ -76,7 +91,7 @@ const RegistroInsumos = ({ stylesRegistro }) => {
       <TextInput
         style={stylesRegistro.input}
         placeholder="Ej. Fertilizante NPK 30-20"
-        placeholderTextColor="#999" // Color más neutro
+        placeholderTextColor="#999"
         value={nombre}
         onChangeText={setNombre}
       />
@@ -108,13 +123,26 @@ const RegistroInsumos = ({ stylesRegistro }) => {
 
       {/* FECHA DE APLICACIÓN */}
       <Text style={stylesRegistro.label}>Fecha de aplicación</Text>
-      <TextInput
-        style={stylesRegistro.input}
-        placeholder="DD-MM-AAAA"
-        placeholderTextColor="#999"
-        value={fecha}
-        onChangeText={setFecha}
-      />
+      <TouchableOpacity onPress={() => setShowPicker(true)}>
+        <TextInput
+          style={stylesRegistro.input}
+          placeholder="DD-MM-AAAA"
+          placeholderTextColor="#999"
+          value={fecha}
+          editable={false}
+          pointerEvents="none"
+        />
+      </TouchableOpacity>
+
+      {showPicker && (
+        <DateTimePicker
+          mode="date"
+          display={Platform.OS === 'ios' ? 'spinner' : 'default'}
+          value={new Date()}
+          onChange={onChangeFecha}
+          maximumDate={new Date()}
+        />
+      )}
 
       {/* PROVEEDOR */}
       <Text style={stylesRegistro.label}>Proveedor</Text>
@@ -127,95 +155,66 @@ const RegistroInsumos = ({ stylesRegistro }) => {
       />
 
       {/* BOTÓN REGISTRO */}
-      <TouchableOpacity
-        style={stylesRegistro.button}
-        onPress={handleRegistro}
-      >
-        <Text style={stylesRegistro.buttonText}>
-          Registrar Insumo
-        </Text>
+      <TouchableOpacity style={stylesRegistro.button} onPress={handleRegistro}>
+        <Text style={stylesRegistro.buttonText}>Registrar Insumo</Text>
       </TouchableOpacity>
     </ScrollView>
   );
 };
 
-
-// Componente principal InsumosScreen con la navegación por tabs
+// --- Componente principal InsumosScreen ---
 export default function InsumosScreen() {
-  const [activeTab, setActiveTab] = useState('registro'); // 'registro' o 'ver'
+  const [activeTab, setActiveTab] = useState('registro');
 
-  const renderContent = () => {
-    // Renderiza el componente basado en la pestaña activa
-    return activeTab === 'registro' 
-      ? <RegistroInsumos stylesRegistro={styles} />
-      : <ViewInsumos />;
-  };
+  const renderContent = () => (
+    activeTab === 'registro' ? <RegistroInsumos stylesRegistro={styles} /> : <ViewInsumos />
+  );
 
   return (
     <View style={styles.safeArea}>
-      
-      {/* Título de la pantalla */}
       <Text style={styles.title}>Gestión de Insumos</Text>
 
-      {/* Tabs de selección */}
+      {/* Tabs */}
       <View style={styles.tabContainer}>
         <TouchableOpacity
-          style={[
-            styles.tabButton, 
-            activeTab === 'registro' && styles.tabButtonActive,
-          ]}
+          style={[styles.tabButton, activeTab === 'registro' && styles.tabButtonActive]}
           onPress={() => setActiveTab('registro')}
         >
-          <Text style={[
-            styles.tabText, 
-            activeTab === 'registro' && styles.tabTextActive,
-          ]}>
+          <Text style={[styles.tabText, activeTab === 'registro' && styles.tabTextActive]}>
             ➕ Registrar Insumo
           </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
-          style={[
-            styles.tabButton, 
-            activeTab === 'ver' && styles.tabButtonActive,
-          ]}
+          style={[styles.tabButton, activeTab === 'ver' && styles.tabButtonActive]}
           onPress={() => setActiveTab('ver')}
         >
-          <Text style={[
-            styles.tabText, 
-            activeTab === 'ver' && styles.tabTextActive,
-          ]}>
+          <Text style={[styles.tabText, activeTab === 'ver' && styles.tabTextActive]}>
             📋 Ver Insumos
           </Text>
         </TouchableOpacity>
       </View>
-      
-      {/* Contenido de la Pestaña Activa */}
-      <View style={styles.contentWrapper}>
-        {renderContent()}
-      </View>
-      
+
+      <View style={styles.contentWrapper}>{renderContent()}</View>
     </View>
   );
 }
 
-// Estilos basados en el componente de referencia, ajustados para el formulario.
+// --- Estilos (sin cambios estructurales) ---
 const styles = StyleSheet.create({
   safeArea: {
     flex: 1,
-    backgroundColor: '#F9F9F9', // Fondo claro
+    backgroundColor: '#F9F9F9',
     paddingHorizontal: 15,
   },
   title: {
     fontSize: 24,
     fontWeight: '700',
-    color: '#4CAF50', // Color verde
+    color: '#4CAF50',
     textAlign: 'center',
     marginTop: 30,
     marginBottom: 20,
   },
-
-  // --- Estilos de la Barra de Navegación (Tabs) ---
   tabContainer: {
     flexDirection: 'row',
     justifyContent: 'space-between',
@@ -229,11 +228,11 @@ const styles = StyleSheet.create({
     paddingVertical: 10,
     borderRadius: 8,
     marginHorizontal: 4,
-    backgroundColor: '#F0F0F0', // Fondo inactivo
+    backgroundColor: '#F0F0F0',
     alignItems: 'center',
   },
   tabButtonActive: {
-    backgroundColor: '#4CAF50', // Fondo activo (Verde)
+    backgroundColor: '#4CAF50',
     shadowColor: '#000',
     shadowOffset: { width: 0, height: 2 },
     shadowOpacity: 0.2,
@@ -246,19 +245,10 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     textAlign: 'center',
   },
-  tabTextActive: {
-    color: '#fff', // Texto activo (Blanco)
-  },
-  
-  // --- Contenedor del Contenido (Registro/Lista) ---
-  contentWrapper: {
-    flex: 1,
-  },
-  scrollContent: {
-     paddingBottom: 20,
-  },
+  tabTextActive: { color: '#fff' },
+  contentWrapper: { flex: 1 },
+  scrollContent: { paddingBottom: 20 },
   etapaContainer: {
-    // Estilo de sombra y fondo blanco para el contenido del tab
     borderRadius: 12,
     backgroundColor: '#fff',
     padding: 10,
@@ -269,11 +259,8 @@ const styles = StyleSheet.create({
     elevation: 2,
     flex: 1,
   },
-
-
-  // --- Estilos del Formulario de Registro (Inputs) ---
   titleScreen: {
-    fontSize: 20, // Ajustado para ser un subtítulo dentro del contenedor
+    fontSize: 20,
     fontWeight: '700',
     color: '#4CAF50',
     marginBottom: 15,
@@ -287,12 +274,12 @@ const styles = StyleSheet.create({
   },
   input: {
     borderWidth: 1,
-    borderColor: '#ccc', // Borde más suave
+    borderColor: '#ccc',
     borderRadius: 8,
     padding: 12,
     marginBottom: 10,
     color: '#333',
-    backgroundColor: '#fff', // Fondo del input blanco
+    backgroundColor: '#fff',
   },
   pickerBox: {
     borderWidth: 1,
@@ -301,10 +288,10 @@ const styles = StyleSheet.create({
     marginBottom: 10,
     backgroundColor: '#fff',
     justifyContent: 'center',
-    height: 50, 
+    height: 50,
   },
   button: {
-    backgroundColor: '#4CAF50', // Verde principal
+    backgroundColor: '#4CAF50',
     padding: 15,
     borderRadius: 8,
     alignItems: 'center',
@@ -317,7 +304,7 @@ const styles = StyleSheet.create({
   },
   buttonText: {
     color: '#fff',
-    fontWeight: 'bold', 
-    fontSize: 16
-  }
+    fontWeight: 'bold',
+    fontSize: 16,
+  },
 });
